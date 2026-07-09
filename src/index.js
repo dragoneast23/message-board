@@ -524,6 +524,7 @@ export default {
             'SELECT id, content, created_at FROM replies WHERE message_id = ? ORDER BY created_at ASC'
           ).bind(msg.id).all();
           msg.replies = replies.results;
+          msg.avatar_url = getAvatarUrl(msg.email);
         }
 
         return Response.json({
