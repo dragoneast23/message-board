@@ -1,3 +1,8 @@
 name = "message-board"
 main = "src/index.js"
 compatibility_date = "2024-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "message-board-db"
+database_id = "86d9bab3-ac9a-4e3b-a2ba-a8081472a94e"
