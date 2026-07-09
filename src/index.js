@@ -516,12 +516,54 @@ function generateSessionToken() {
     .join('');
 }
 
-async function computeMd5Hash(str) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(str.toLowerCase().trim());
-  const hashBuffer = await crypto.subtle.digest('MD5', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+function computeMd5Hash(str) {
+  str = str.toLowerCase().trim();
+  if (str.length === 0) return '0'.repeat(32);
+  const len = str.length;
+  const k = [0x00000000, 0x5a827999, 0x6ed9eba1, 0x8f1bbcdc];
+  const s = [7, 12, 17, 22, 5, 9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21];
+  const a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+  let a = a0, b = b0, c = c0, d = d0;
+  const msgLen = Math.ceil(len / 64);
+  const msg = [];
+  for (let j = 0; j < msgLen; j++) {
+    msg[j] = [];
+    for (let i = 0; i < 16; i++) {
+      const bytePos = j * 64 + i * 4;
+      msg[j][i] = (bytePos + 3 < len ? str.charCodeAt(bytePos + 3) << 24 : 0) |
+        (bytePos + 2 < len ? str.charCodeAt(bytePos + 2) << 16 : 0) |
+        (bytePos + 1 < len ? str.charCodeAt(bytePos + 1) << 8 : 0) |
+        (bytePos < len ? str.charCodeAt(bytePos) : 0);
+    }
+  }
+  const bitLen = len * 8;
+  msg[msgLen - 1][14] = bitLen & 0xFFFFFFFF;
+  msg[msgLen - 1][15] = (bitLen / 0x100000000) & 0xFFFFFFFF;
+  for (let j = 0; j < msgLen; j++) {
+    const M = msg[j];
+    let AA = a, BB = b, CC = c, DD = d;
+    for (let i = 0; i < 64; i++) {
+      let f, g;
+      if (i < 16) { f = (b & c) | (~b & d); g = i; }
+      else if (i < 32) { f = (d & b) | (~d & c); g = (5 * i + 1) % 16; }
+      else if (i < 48) { f = b ^ c ^ d; g = (3 * i + 5) % 16; }
+      else { f = c ^ (b | ~d); g = (7 * i) % 16; }
+      const temp = d;
+      d = c;
+      c = b;
+      b = (b + ((a + f + k[i >>> 4] + M[g]) << s[i]) | ((a + f + k[i >>> 4] + M[g]) >>> (32 - s[i]))) | 0;
+      a = temp;
+    }
+    a = (a + AA) | 0; b = (b + BB) | 0; c = (c + CC) | 0; d = (d + DD) | 0;
+  }
+  const toHex = (n) => {
+    let h = '';
+    for (let i = 0; i < 4; i++) {
+      h += ((n >> (8 * i)) & 0xFF).toString(16).padStart(2, '0');
+    }
+    return h;
+  };
+  return toHex(a) + toHex(b) + toHex(c) + toHex(d);
 }
 
 export default {
