@@ -568,16 +568,27 @@ function computeMd5Hash(str) {
 
 export default {
   async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    const path = url.pathname;
+    try {
+      const url = new URL(request.url);
+      const path = url.pathname;
 
-    if (path.startsWith('/api/')) {
-      return await handleApiRequest(request, env, ctx, url);
+      if (path.startsWith('/api/')) {
+        return await handleApiRequest(request, env, ctx, url);
+      }
+
+      return new Response(HTML, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' }
+      });
+    } catch (error) {
+      console.error('Worker error:', error);
+      return new Response(JSON.stringify({
+        success: false,
+        message: '服务器错误: ' + error.message
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
-
-    return new Response(HTML, {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' }
-    });
   }
 };
 
