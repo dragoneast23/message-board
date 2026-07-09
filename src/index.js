@@ -139,10 +139,11 @@
   return (wordToHex(a) + wordToHex(b) + wordToHex(c) + wordToHex(d)).toLowerCase();
 }
 
-function getGravatarUrl(email) {
-  if (!email) return 'https://www.gravatar.com/avatar/d41d8cd98f00b204e9800998ecf8427e?s=64';
+function getAvatarUrl(email) {
+  if (!email) return 'https://api.dicebear.com/9.x/avataaars/svg?seed=default';
   const hash = md5(email.toLowerCase().trim());
-  return `https://www.gravatar.com/avatar/${hash}?s=64&d=identicon`;
+  const seed = hash.substring(0, 8);
+  return `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`;
 }
 
 function escapeHtml(text) {
@@ -544,7 +545,7 @@ export default {
           return Response.json({ error: '内容过长' }, { status: 400 });
         }
 
-        const avatarUrl = getGravatarUrl(email);
+        const avatarUrl = getAvatarUrl(email);
 
         await env.DB.prepare(
           'INSERT INTO messages (name, email, content, avatar_url) VALUES (?, ?, ?, ?)'
