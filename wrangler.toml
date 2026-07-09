@@ -2,10 +2,7 @@ name = "message-board"
 main = "src/index.js"
 compatibility_date = "2024-09-01"
 
-[env.production]
-name = "message-board-production"
-
 [[d1_databases]]
 binding = "DB"
 database_name = "message-board-db"
-database_id = "26501bef-9d4d-4a10-b196-bd09d0eeee2f"
+database_id = ""
