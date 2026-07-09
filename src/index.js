@@ -694,7 +694,7 @@ async function createMessage(request, env) {
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedContent = content.trim();
 
-    const emailHash = await computeMd5Hash(trimmedEmail);
+    const emailHash = computeMd5Hash(trimmedEmail);
     const avatarUrl = `https://www.gravatar.com/avatar/${emailHash}?d=identicon`;
 
     await env.DB.prepare(`
